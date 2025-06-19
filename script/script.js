@@ -1,293 +1,649 @@
-// cores que achei bonitas na internet
-var cores = [
-    'rgba(54, 162, 235, 0.6)',   
-    'rgba(255, 99, 132, 0.6)',   
-    'rgba(75, 192, 192, 0.6)',   
-    'rgba(255, 205, 86, 0.6)',   
-    'rgba(153, 102, 255, 0.6)',  
-    'rgba(255, 159, 64, 0.6)',   
-    'rgba(199, 199, 199, 0.6)',  
-    'rgba(83, 102, 255, 0.6)',   
-    'rgba(255, 99, 255, 0.6)',   
-    'rgba(99, 255, 132, 0.6)'    
-  ];
+const sheetId = '1Hqth_IwtnA-NG66xx58owjtBwUMuHEShrUWuI5h1wUw';
 
-  // pega cor
-  function pegaCor(numero) {
-    return cores[numero % cores.length];
-  }
+const gid1 = '847253010';
 
-  // faz a cor da borda
-  function fazCorDaBorda(corDoFundo) {
-    return corDoFundo.replace('0.6', '1');
-  }
+fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid1}`)
+    .then(res => res.text())
+    .then(text => {
+        const json = JSON.parse(text.substring(47).slice(0, -2));
+        const rows = json.table.rows;
 
-  // array com os dados dos graficos (copiei os gids do google)
-  var planilhas = [
-    // grafico 1
-    { gid: '1454563529', titulo: 'Transplantes Brasil (2009–2021)',
-      idDoElemento: 'chart1', tipoDoGrafico: 'line', somenteUmDataset: true },
+        const anos = [];
+        const transplantes = [];
 
-    // grafico 2  
-    { gid: '1083333708', titulo: 'Pacientes na Lista (2015–2021)',
-      idDoElemento: 'chart2', tipoDoGrafico: 'line', somenteUmDataset: false },
+        const headerRow = rows[0].c;
+        const dataRow = rows[1].c;
 
-    // grafico 3
-    { gid: '1604091063', titulo: 'Mortalidade Transplante USA (2013–2020)',
-      idDoElemento: 'chart3', tipoDoGrafico: 'line', somenteUmDataset: false },
+        for (let i = 1; i < headerRow.length; i++) { 
+            const ano = headerRow[i]?.v;
+            const total = dataRow[i]?.v;
 
-    // grafico 4
-    { gid: '1488328750', titulo: 'Patient List (2015–2021)',
-      idDoElemento: 'chart4', tipoDoGrafico: 'line', somenteUmDataset: false },
+            if (ano && total) {
+                anos.push(String(ano)); 
+                transplantes.push(Number(total));
+            }
+        }
 
-    // grafico 5 
-    { gid: '906573690', titulo: 'Patients Year - Gráfico 1 (2013–2020)',
-      idDoElemento: 'chart5', tipoDoGrafico: 'line', somenteUmDataset: false },
+        const ctx1 = document.getElementById('chart1').getContext('2d');
+        const loadingChart1 = document.getElementById('loading-chart1');
+        const chart1Canvas = document.getElementById('chart1');
 
-    // grafico 6
-    { gid: '906573690', titulo: 'Patients Year - Gráfico 2 (2013–2020)',
-      idDoElemento: 'chart6', tipoDoGrafico: 'line', somenteUmDataset: false },
+        new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: anos,
+                datasets: [{
+                    label: 'Número de Transplantes de Coração',
+                    data: transplantes,
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 4,
+                    pointBackgroundColor: 'rgb(255, 99, 132)'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    title: {
+                        display: true,
+                        text: 'Transplantes de Coração por Ano no Brasil'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                        display: true,
+                        text: 'Quantidade de Transplantes'
+                        }
+                    },
+                    x: {
+                        title: {
+                        display: true,
+                        text: 'Ano'
+                        }
+                    }
+                }
+            }
+        });
 
-    // grafico 7
-    { gid: '1083333708', titulo: 'Mortality (2020–2015)',
-      idDoElemento: 'chart7', tipoDoGrafico: 'bar', somenteUmDataset: true, inverter: true }
-  ];
+        loadingChart1.style.display = 'none';
+        chart1Canvas.style.display = 'block';
+    })
+    .catch(err => {
+        console.error('Erro ao carregar os dados da planilha (Chart 1):', err);
+        const loadingChart1 = document.getElementById('loading-chart1');
+        if (loadingChart1) {
+            loadingChart1.textContent = 'Erro ao carregar dados do gráfico 1.';
+            loadingChart1.style.color = 'red';
+        }
+    });
 
-  // url base que copiei do google sheets
-  var urlBase = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTqeFn_s4sGrF3pD2eddnPW2jpObRkjnDPjKkE_BRH2gRFG-g8tW89xw48KZrSpOg';
+const gid2 = '1808648066'; 
 
-  // funcao que monta a url do csv
-  function montaUrlDoCSV(gid) {
-    return urlBase + '/pub?gid=' + gid + '&single=true&output=csv';
-  }
+fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid2}`)
+  .then(res => res.text())
+  .then(text => {
+    const json = JSON.parse(text.substring(47).slice(0, -2));
+    const rows = json.table.rows;
 
-  // mostra erro quando da problema
-  function mostraErro(idDoElemento, mensagem) {
-    var elementoDeCarregamento = document.getElementById('loading-' + idDoElemento);
-    if (elementoDeCarregamento) {
-      elementoDeCarregamento.innerHTML = '<div class="error">Erro: ' + mensagem + '</div>';
+    const anos = [];
+    const pacientesTotal = [];
+    const mortesTotal = [];
+    const pacientesPediatricos = [];
+    const mortesPediatrico = [];
+    const percentualFalecimentoBrasil = [];
+    const percentualMortalidadePediatrico = [];
+
+    const rowIndexPacientesTotal = 3;
+    const rowIndexMortesTotal = 4;
+    const rowIndexPacientesPediatricos = 7;
+    const rowIndexMortesPediatrico = 8;
+    const rowIndexPercFalecimentoBrasil = 9;
+    const rowIndexPercMortalidadePediatrico = 10;
+
+    for (let i = 7; i >= 1; i--) { 
+        const ano = 2015 + (7 - i); 
+        anos.push(String(ano));
+        pacientesTotal.push(rows[rowIndexPacientesTotal].c[i]?.v || 0);
+        mortesTotal.push(rows[rowIndexMortesTotal].c[i]?.v || 0);
+        pacientesPediatricos.push(rows[rowIndexPacientesPediatricos].c[i]?.v || 0);
+        mortesPediatrico.push(rows[rowIndexMortesPediatrico].c[i]?.v || 0);
+        percentualFalecimentoBrasil.push(rows[rowIndexPercFalecimentoBrasil].c[i]?.v || 0);
+        percentualMortalidadePediatrico.push(rows[rowIndexPercMortalidadePediatrico].c[i]?.v || 0);
     }
-    console.error('Erro no ' + idDoElemento + ':', mensagem);
-  }
 
-  // esconde o loading e mostra o canvas
-  function mostraGrafico(idDoElemento) {
-    var elementoDeCarregamento = document.getElementById('loading-' + idDoElemento);
-    var canvas = document.getElementById(idDoElemento);
-    
-    if (elementoDeCarregamento) {
-      elementoDeCarregamento.style.display = 'none';
-    }
-    if (canvas) {
-      canvas.style.display = 'block';
-    }
-  }
+    const ctx2 = document.getElementById('chart2').getContext('2d');
+    const loadingChart2 = document.getElementById('loading-chart2');
+    const chart2Canvas = document.getElementById('chart2');
 
-  // cria o grafico (funcao principal)
-  function criaGrafico(config, dados) {
-    try {
-      console.log(config.titulo, dados); // debug pra ver se ta funcionando
-      
-      // verifica se tem dados
-      if (!dados || dados.length === 0) {
-        throw new Error('Dados vazios ou inválidos');
-      }
-
-      // pega os headers (colunas)
-      var headers = Object.keys(dados[0]);
-      // pega os labels (primeira coluna que eh sempre ano)
-      var labels = [];
-      for (var i = 0; i < dados.length; i++) {
-        labels.push(dados[i][headers[0]]);
-      }
-      
-      // se tem que inverter faz isso
-      if (config.inverter) {
-        labels = labels.reverse();
-      }
-
-      // array dos datasets
-      var datasets = [];
-      var comeco = 1; // ignora a primeira coluna que eh ano
-      var fim;
-      if (config.somenteUmDataset) {
-        fim = 2; // so pega uma coluna alem do ano
-      } else {
-        fim = headers.length; // pega todas as colunas
-      }
-      
-      // loop pra criar os datasets
-      for (var i = comeco; i < fim; i++) {
-        var nomeColuna = headers[i];
-        if (!nomeColuna) continue; // pula se nao tem nome
-        
-        // pega os valores da coluna
-        var valores = [];
-        for (var j = 0; j < dados.length; j++) {
-          var valor = parseFloat(dados[j][nomeColuna]);
-          if (isNaN(valor)) {
-            valores.push(0);
-          } else {
-            valores.push(valor);
-          }
-        }
-        
-        // inverte se precisa
-        if (config.inverter) {
-          valores = valores.reverse();
-        }
-        
-        // so adiciona se tem dados validos ou se eh single dataset
-        var temDadosValidos = false;
-        for (var k = 0; k < valores.length; k++) {
-          if (valores[k] !== 0) {
-            temDadosValidos = true;
-            break;
-          }
-        }
-        
-        if (config.somenteUmDataset || temDadosValidos) {
-          var corDeFundo = pegaCor(i - 1);
-          var corDaBorda = fazCorDaBorda(corDeFundo);
-          
-          // cria o objeto do dataset
-          var dataset = {
-            label: nomeColuna,
-            data: valores,
-            borderColor: corDaBorda,
-            borderWidth: 2,
-            fill: false
-          };
-          
-          // configura cor de fundo se for barra
-          if (config.tipoDoGrafico === 'bar') {
-            dataset.backgroundColor = corDeFundo;
-          } else {
-            dataset.backgroundColor = 'transparent';
-          }
-          
-          // configura tensao se for linha
-          if (config.tipoDoGrafico === 'line') {
-            dataset.tension = 0.3;
-          } else {
-            dataset.tension = 0;
-          }
-          
-          datasets.push(dataset);
-        }
-      }
-
-      // verifica se tem pelo menos um dataset
-      if (datasets.length === 0) {
-        throw new Error('Nenhum dataset válido encontrado');
-      }
-
-      mostraGrafico(config.idDoElemento);
-
-      // cria o grafico usando Chart.js
-      var ctx = document.getElementById(config.idDoElemento);
-      var chart = new Chart(ctx.getContext('2d'), {
-        type: config.tipoDoGrafico,
+    new Chart(ctx2, {
+        type: 'scatter',
         data: {
-          labels: labels,
-          datasets: datasets
+            labels: anos,
+            datasets: [
+                {
+                    label: 'Pacientes Total',
+                    data: pacientesTotal.map((data, index) => ({ x: anos[index], y: data })),
+                    borderColor: 'blue',
+                    backgroundColor: 'blue',
+                    pointRadius: 5
+                },
+                {
+                    label: 'Mortes Total',
+                    data: mortesTotal.map((data, index) => ({ x: anos[index], y: data })),
+                    borderColor: 'orange',
+                    backgroundColor: 'orange',
+                    pointRadius: 5
+                },
+                {
+                    label: 'Pacientes Pediátricos',
+                    data: pacientesPediatricos.map((data, index) => ({ x: anos[index], y: data })),
+                    borderColor: 'gray',
+                    backgroundColor: 'gray',
+                    pointRadius: 5
+                },
+                {
+                    label: 'Mortes Pediátrico',
+                    data: mortesPediatrico.map((data, index) => ({ x: anos[index], y: data })),
+                    borderColor: 'yellow',
+                    backgroundColor: 'yellow',
+                    pointRadius: 5
+                }
+            ]
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          animation: {
-            duration: 1000
-          },
-          plugins: {
-            legend: {
-              position: 'top',
-              labels: {
-                usePointStyle: true,
-                padding: 15
-              }
-            },
-            title: {
-              display: true,
-              text: config.titulo,
-              font: {
-                size: 16,
-                weight: 'bold'
-              },
-              padding: 20
-            }
-          },
-          scales: {
-            x: {
-              title: {
-                display: true,
-                text: 'Ano',
-                font: {
-                  weight: 'bold'
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                title: {
+                    display: true,
+                    text: 'Curva de Pacientes na Lista de Espera de 2015 a 2021'
                 }
-              },
-              grid: {
-                display: false
-              }
             },
-            y: {
-              title: {
-                display: true,
-                text: 'Quantidade',
-                font: {
-                  weight: 'bold'
+            scales: {
+                x: {
+                    type: 'category',
+                    title: {
+                        display: true,
+                        text: 'Ano de Referência'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Número de Pacientes'
+                    }
                 }
-              },
-              beginAtZero: true,
-              grid: {
-                color: 'rgba(0, 0, 0, 0.1)'
-              }
             }
-          },
-          interaction: {
-            intersect: false,
-            mode: 'index'
-          },
-          layout: {
-            padding: 10
-          }
         }
-      });
+    });
 
-    } catch (erro) {
-      console.error('Erro ao processar dados para ' + config.titulo + ':', erro);
-      mostraErro(config.idDoElemento, 'Falha ao processar dados: ' + erro.message);
-    }
-  }
+    loadingChart2.style.display = 'none';
+    chart2Canvas.style.display = 'block';
 
-  // quando a pagina carrega executa isso
-  document.addEventListener('DOMContentLoaded', function() {
-    // loop pra carregar todos os graficos
-    for (var i = 0; i < planilhas.length; i++) {
-      var planilha = planilhas[i];
-      
-      // usa o PapaParse pra ler o CSV
-      Papa.parse(montaUrlDoCSV(planilha.gid), {
-        download: true,
-        header: true,
-        dynamicTyping: true,
-        skipEmptyLines: true,
-        complete: function(resultado) {
-          // closure pra capturar a planilha certa
-          return function(planilhaAtual) {
-            return function(res) {
-              if (res.errors.length) {
-                mostraErro(planilhaAtual.idDoElemento, 'Falha ao processar CSV');
-                return;
-              }
-              criaGrafico(planilhaAtual, res.data);
-            };
-          }(planilha);
-        }(),
-        error: function(planilhaAtual) {
-          return function(erro) {
-            mostraErro(planilhaAtual.idDoElemento, erro.message);
-          };
-        }(planilha)
-      });
+    const ctx3 = document.getElementById('chart3').getContext('2d');
+    const loadingChart3 = document.getElementById('loading-chart3');
+    const chart3Canvas = document.getElementById('chart3');
+
+    new Chart(ctx3, {
+        type: 'scatter',
+        data: {
+            labels: anos,
+            datasets: [
+                {
+                    label: 'Porcentagem de Falecimento na Lista de Espera Brasil',
+                    data: percentualFalecimentoBrasil.map((data, index) => ({ x: anos[index], y: data })),
+                    borderColor: 'blue',
+                    backgroundColor: 'blue',
+                    pointRadius: 5
+                },
+                {
+                    label: 'Porcentagem de Mortalidade Pediátrico',
+                    data: percentualMortalidadePediatrico.map((data, index) => ({ x: anos[index], y: data })),
+                    borderColor: 'orange',
+                    backgroundColor: 'orange',
+                    pointRadius: 5
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                title: {
+                    display: true,
+                    text: 'Curva de Mortalidade da Lista de Espera de 2015 a 2021'
+                }
+            },
+            scales: {
+                x: {
+                    type: 'category',
+                    title: {
+                        display: true,
+                        text: 'Ano de Referência'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Porcentagem de Mortes (%)'
+                    }
+                }
+            }
+        }
+    });
+
+    loadingChart3.style.display = 'none';
+    chart3Canvas.style.display = 'block';
+
+  })
+  .catch(err => {
+    console.error('Erro ao carregar os dados da planilha (Novos Gráficos):', err);
+    const loadingChart2 = document.getElementById('loading-chart2');
+    if (loadingChart2) {
+        loadingChart2.textContent = 'Erro ao carregar dados do gráfico 2.';
+        loadingChart2.style.color = 'red';
     }
+    const loadingChart3 = document.getElementById('loading-chart3');
+    if (loadingChart3) {
+        loadingChart3.textContent = 'Erro ao carregar dados do gráfico 3.';
+        loadingChart3.style.color = 'red';
+    }
+  });
+
+
+  const gid3 = '1872058242'; 
+
+fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid3}`)
+  .then(res => res.text())
+  .then(text => {
+    const json = JSON.parse(text.substring(47).slice(0, -2));
+    const rows = json.table.rows;
+
+    const anosEUA = [];
+    const pacientesListaEsperaEUA = [];
+    const falecimentoListaEsperaEUA = [];
+    const comDavListaEsperaEUA = [];
+    const porcentagemMortesEUA = [];
+
+    const rowIndexAnoReferencia = 0; 
+    const rowIndexPacientesListaEspera = 1;
+    const rowIndexFalecimentoListaEspera = 2;
+    const rowIndexComDavListaEspera = 5;
+    const rowIndexPorcentagemMortes = 8;
+
+    for (let i = 1; i <= 8; i++) {
+        anosEUA.push(rows[rowIndexAnoReferencia].c[i]?.v);
+        pacientesListaEsperaEUA.push(rows[rowIndexPacientesListaEspera].c[i]?.v || 0);
+        falecimentoListaEsperaEUA.push(rows[rowIndexFalecimentoListaEspera].c[i]?.v || 0);
+        comDavListaEsperaEUA.push(rows[rowIndexComDavListaEspera].c[i]?.v || 0);
+        porcentagemMortesEUA.push(rows[rowIndexPorcentagemMortes].c[i]?.v || 0);
+    }
+
+    const ctx4 = document.getElementById('chart4').getContext('2d');
+    const loadingChart4 = document.getElementById('loading-chart4');
+    const chart4Canvas = document.getElementById('chart4');
+
+    new Chart(ctx4, {
+        type: 'scatter',
+        data: {
+            labels: anosEUA,
+            datasets: [
+                {
+                    label: 'Pacientes na lista de espera',
+                    data: pacientesListaEsperaEUA.map((data, index) => ({ x: anosEUA[index], y: data })),
+                    borderColor: 'blue',
+                    backgroundColor: 'blue',
+                    pointRadius: 5
+                },
+                {
+                    label: 'Falecimento na lista de espera',
+                    data: falecimentoListaEsperaEUA.map((data, index) => ({ x: anosEUA[index], y: data })),
+                    borderColor: 'gray',
+                    backgroundColor: 'gray',
+                    pointRadius: 5
+                },
+                {
+                    label: 'Com DAV na lista de espera',
+                    data: comDavListaEsperaEUA.map((data, index) => ({ x: anosEUA[index], y: data })),
+                    borderColor: 'orange',
+                    backgroundColor: 'orange',
+                    pointRadius: 5
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                title: {
+                    display: true,
+                    text: 'Curva de Número de Pacientes por Ano (EUA)'
+                }
+            },
+            scales: {
+                x: {
+                    type: 'category',
+                    title: {
+                        display: true,
+                        text: 'Ano de Referência'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Número de Pacientes'
+                    }
+                }
+            }
+        }
+    });
+
+    loadingChart4.style.display = 'none';
+    chart4Canvas.style.display = 'block';
+
+    const ctx5 = document.getElementById('chart5').getContext('2d');
+    const loadingChart5 = document.getElementById('loading-chart5');
+    const chart5Canvas = document.getElementById('chart5');
+
+    new Chart(ctx5, {
+        type: 'scatter',
+        data: {
+            labels: anosEUA,
+            datasets: [
+                {
+                    label: 'Porcentagem de Mortes na Lista de Espera',
+                    data: porcentagemMortesEUA.map((data, index) => ({ x: anosEUA[index], y: data })),
+                    borderColor: 'blue',
+                    backgroundColor: 'blue',
+                    pointRadius: 5
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                title: {
+                    display: true,
+                    text: 'Curva de Mortalidade na lista de espera 2013 a 2020 (EUA)'
+                }
+            },
+            scales: {
+                x: {
+                    type: 'category',
+                    title: {
+                        display: true,
+                        text: 'Ano de Referência'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Porcentagem de Mortes (%)'
+                    }
+                }
+            }
+        }
+    });
+
+    loadingChart5.style.display = 'none';
+    chart5Canvas.style.display = 'block';
+
+  })
+  .catch(err => {
+    console.error('Erro ao carregar os dados da planilha (Novos Gráficos EUA):', err);
+    const loadingChart4 = document.getElementById('loading-chart4');
+    if (loadingChart4) {
+        loadingChart4.textContent = 'Erro ao carregar dados do gráfico 4.';
+        loadingChart4.style.color = 'red';
+    }
+    const loadingChart5 = document.getElementById('loading-chart5');
+    if (loadingChart5) {
+        loadingChart5.textContent = 'Erro ao carregar dados do gráfico 5.';
+        loadingChart5.style.color = 'red';
+    }
+  });
+
+const gid4 = '372243698'; 
+
+fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid4}`)
+  .then(res => res.text())
+  .then(text => {
+    const json = JSON.parse(text.substring(47).slice(0, -2));
+    const rows = json.table.rows;
+
+    const anosChart6 = []; 
+    const totalPatients = []; 
+    const totalDeaths = []; 
+
+    const rowIndexTotalPatients = 3; 
+    const rowIndexTotalDeaths = 4;   
+
+    
+    for (let i = 7; i >= 1; i--) { 
+        const ano = 2015 + (7 - i); 
+        anosChart6.push(String(ano));
+        totalPatients.push(rows[rowIndexTotalPatients].c[i]?.v || 0);
+        totalDeaths.push(rows[rowIndexTotalDeaths].c[i]?.v || 0);
+    }
+
+    const ctx6 = document.getElementById('chart6').getContext('2d');
+    const loadingChart6 = document.getElementById('loading-chart6');
+    const chart6Canvas = document.getElementById('chart6');
+
+    new Chart(ctx6, {
+        type: 'scatter', 
+        data: {
+            labels: anosChart6, 
+            datasets: [
+                {
+                    label: 'Total Patients',
+                    data: totalPatients.map((data, index) => ({ x: anosChart6[index], y: data })),
+                    borderColor: 'blue',
+                    backgroundColor: 'blue',
+                    pointRadius: 5
+                },
+                {
+                    label: 'Total Deaths',
+                    data: totalDeaths.map((data, index) => ({ x: anosChart6[index], y: data })),
+                    borderColor: 'orange',
+                    backgroundColor: 'orange',
+                    pointRadius: 5
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                title: {
+                    display: true,
+                    text: 'Curve of Patients on the Waiting List from 2015 to 2021 in Brazil' 
+                }
+            },
+            scales: {
+                x: {
+                    type: 'category', 
+                    title: {
+                        display: true,
+                        text: 'Reference Year' 
+                    }
+                },
+                y: {
+                    type: 'linear', 
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Patients' 
+                    }
+                }
+            }
+        }
+    });
+
+    loadingChart6.style.display = 'none';
+    chart6Canvas.style.display = 'block';
+
+  })
+  .catch(err => {
+    console.error('Erro ao carregar os dados da planilha (Gráfico Brasil - Aba 4):', err);
+    const loadingChart6 = document.getElementById('loading-chart6');
+    if (loadingChart6) {
+        loadingChart6.textContent = 'Erro ao carregar dados do gráfico 6.';
+        loadingChart6.style.color = 'red';
+    }
+  });
+
+const gid5 = '1328387618'; 
+
+fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid5}`)
+  .then(res => res.text())
+  .then(text => {
+    const json = JSON.parse(text.substring(47).slice(0, -2));
+    const rows = json.table.rows;
+
+    const anosG5 = []; 
+    const patientsWaitingList = [];
+    const deathWaitingList = [];
+    const heartTransplantOnly = [];
+    const percentageDeathsWaitingList = []; 
+
+    const rowIndexReferenceYear = 0;
+    const rowIndexPatientsWaitingList = 1;
+    const rowIndexDeathWaitingList = 2;
+    const rowIndexHeartTransplantOnly = 3;
+
+    const startYearG5 = 2013;
+
+    for (let i = 1; i <= 8; i++) { 
+        const ano = startYearG5 + (i - 1); 
+        anosG5.push(String(ano));
+
+        const patients = Number(rows[rowIndexPatientsWaitingList].c[i]?.v) || 0;
+        const deaths = Number(rows[rowIndexDeathWaitingList].c[i]?.v) || 0;
+        
+        patientsWaitingList.push(patients);
+        deathWaitingList.push(deaths);
+        heartTransplantOnly.push(Number(rows[rowIndexHeartTransplantOnly].c[i]?.v) || 0);
+        
+        if (patients > 0) {
+            percentageDeathsWaitingList.push((deaths / patients) * 100);
+        } else {
+            percentageDeathsWaitingList.push(0);
+        }
+    }
+
+    const ctx7 = document.getElementById('chart7').getContext('2d');
+    const loadingChart7 = document.getElementById('loading-chart7');
+    const chart7Canvas = document.getElementById('chart7');
+
+    new Chart(ctx7, {
+        type: 'scatter',
+        data: {
+            labels: anosG5,
+            datasets: [
+                {
+                    label: 'Patients on the waiting list',
+                    data: patientsWaitingList.map((data, index) => ({ x: anosG5[index], y: data })),
+                    borderColor: 'blue',
+                    backgroundColor: 'blue',
+                    pointRadius: 5
+                },
+                {
+                    label: 'Death on the waiting list',
+                    data: deathWaitingList.map((data, index) => ({ x: anosG5[index], y: data })),
+                    borderColor: 'orange',
+                    backgroundColor: 'orange',
+                    pointRadius: 5
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                title: {
+                    display: true,
+                    text: 'Curve of Number of Patients per Year (2013-2020)' // Adicionado o range de anos para clareza
+                }
+            },
+            scales: {
+                x: {
+                    type: 'category',
+                    title: {
+                        display: true,
+                        text: 'Reference Year'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Patients'
+                    }
+                }
+            }
+        }
+    });
+
+    loadingChart7.style.display = 'none';
+    chart7Canvas.style.display = 'block';
+
+    const ctx8 = document.getElementById('chart8').getContext('2d');
+    const loadingChart8 = document.getElementById('loading-chart8');
+    const chart8Canvas = document.getElementById('chart8');
+
+    new Chart(ctx8, {
+        type: 'scatter',
+        data: {
+            labels: anosG5,
+            datasets: [
+                {
+                    label: 'Heart Transplant (heart only)',
+                    data: heartTransplantOnly.map((data, index) => ({ x: anosG5[index], y: data })),
+                    borderColor: 'blue',
+                    backgroundColor: 'blue',
+                    pointRadius: 5
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                title: {
+                    display: true,
+                    text: 'Heart Transplants per Year (2013-2020)' 
+                }
+            },
+            scales: {
+                x: {
+                    type: 'category',
+                    title: {
+                        display: true,
+                        text: 'Reference Year'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Patients'
+                    }
+                }
+            }
+        }
+    });
+
+    loadingChart8.style.display = 'none';
+    chart8Canvas.style.display = 'block';
   });

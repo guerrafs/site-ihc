@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html>
+
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8">
     
+    <link rel="stylesheet" href="style/style.css">
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-    <link rel="stylesheet" href="style/style.css">
 
     <title>Transplantes no Brasil - Dashboard</title>
   </head>
@@ -25,44 +27,52 @@
         </div>
   
         <div class="chart-container">
-          <h2>Pacientes na Lista (2015–2021)</h2>
+          <h2>Curva de Pacientes na Lista de Espera (2015-2021)</h2>
           <div class="loading" id="loading-chart2">Carregando dados...</div>
           <canvas id="chart2" style="display: none;"></canvas>
         </div>
-  
+
         <div class="chart-container">
-          <h2>Mortalidade Transplante USA (2013–2020)</h2>
+          <h2>Curva de Mortalidade da Lista de Espera (2015-2021)</h2>
           <div class="loading" id="loading-chart3">Carregando dados...</div>
           <canvas id="chart3" style="display: none;"></canvas>
         </div>
-  
+
         <div class="chart-container">
-          <h2>Patient List (2015–2021)</h2>
+          <h2>Curva de Número de Pacientes por Ano (EUA)</h2>
           <div class="loading" id="loading-chart4">Carregando dados...</div>
           <canvas id="chart4" style="display: none;"></canvas>
         </div>
-  
+
         <div class="chart-container">
-          <h2>Patients Year - Gráfico 1 (2013–2020)</h2>
+          <h2>Curva de Mortalidade na Lista de Espera (EUA) (2013-2020)</h2>
           <div class="loading" id="loading-chart5">Carregando dados...</div>
           <canvas id="chart5" style="display: none;"></canvas>
         </div>
-  
+
         <div class="chart-container">
-          <h2>Patients Year - Gráfico 2 (2013–2020)</h2>
+          <h2>Curve of Patients on the Waiting List from 2015 to 2021 in Brazil</h2>
           <div class="loading" id="loading-chart6">Carregando dados...</div>
           <canvas id="chart6" style="display: none;"></canvas>
         </div>
-  
+
         <div class="chart-container">
-          <h2>Mortality (2020–2015)</h2>
+          <h2>Curve of Number of Patients per Year</h2>
           <div class="loading" id="loading-chart7">Carregando dados...</div>
           <canvas id="chart7" style="display: none;"></canvas>
+        </div>
+
+        <div class="chart-container">
+          <h2>Heart Transplants per Year</h2>
+          <div class="loading" id="loading-chart8">Carregando dados...</div>
+          <canvas id="chart8" style="display: none;"></canvas>
         </div>
       </div>
     </main>
     
-
+    <footer>
+      Fonte dos dados: <a href="https://docs.google.com/spreadsheets/d/1Hqth_IwtnA-NG66xx58owjtBwUMuHEShrUWuI5h1wUw/edit?gid=847253010" target="_blank">Planilha no Google Sheets</a> 
+    </footer>
     <script src="script/script.js"></script>
   </body>
 </html>
